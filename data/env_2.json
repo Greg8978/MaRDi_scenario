@@ -1,0 +1,73 @@
+{
+  "objects": [
+    {
+      "folder": "props/objects.blend",
+      "object": "WhiteVideotape",
+      "graspable": 1,
+      "label": "WHITE_TAPE",
+      "position": "livingroom_table",
+      "type": "tape",
+      "color": "white"
+    },
+    {
+      "folder": "props/objects.blend",
+      "object": "BlackVideotape",
+      "graspable": 1,
+      "label": "BLACK_TAPE",
+      "position": "bedroom_bedsidetable",
+      "type": "tape",
+      "color": "black"
+    },
+    {
+      "folder": "props/misc_objects.blend",
+      "object": "Book_Wine_fat",
+      "graspable": 1,
+      "label": "RED_BOOK",
+      "position": "livingroom_table",
+      "type": "book",
+      "color": "red"
+    },
+    {
+      "folder": "props/misc_objects.blend",
+      "object": "Book_Blue_fat",
+      "graspable": 1,
+      "label": "BLUE_BOOK",
+      "position": "kitchen_table",
+      "type": "book",
+      "color": "blue"
+    },
+    {
+      "folder": "props/misc_objects.blend",
+      "object": "Book_Brown_fat",
+      "graspable": 1,
+      "label": "BROWN_BOOK",
+      "position": "kitchen_table",
+      "type": "book",
+      "color": "brown"
+    },
+    {
+      "folder": "props/kitchen_objects.blend",
+      "object": "Cup_Blue",
+      "graspable": 1,
+      "label": "BLUE_MUG",
+      "position": "livingroom_coffeetable",
+      "type": "mug",
+      "color": "blue"
+    },
+    {
+      "folder": "props/kitchen_objects.blend",
+      "object": "Cup_Gray",
+      "graspable": 1,
+      "label": "GRAY_MUG",
+      "position": "livingroom_table",
+      "type": "mug",
+      "color": "gray"
+    } 
+  ],
+  "location": [
+    "livingroom_coffeetable",
+    "livingroom_table",
+    "kitchen_table",
+    "bedroom_bedsidetable"  
+  ]
+}

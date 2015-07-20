@@ -1,0 +1,124 @@
+#! /usr/bin/env morseexec
+
+import sys
+sys.path.insert(0, '/home/gmilliez/openrobots/share/modules/python')
+sys.path.insert(0, '.')
+sys.path.insert(0, 'pymardi')
+
+import random
+from simulsetup import PositionSetter
+from morse.builder import *
+
+###### OBJECTS ######
+
+# STATIC OBJECTS
+#table = PassiveObject('props/objects.blend','SmallTable')
+#table.properties(Object = True, Graspable = False, Label = "HRP2TABLE")
+#table.translate(x=8.1, y=6.3, z=0)
+#table.rotate(z=1.57)
+
+#table2 = PassiveObject('props/objects.blend','SmallTable')
+table2 = PassiveObject('props/furnitures.blend','office_desk')
+table2.properties(Object = True, Graspable = False, Label = "DESKkikoo")
+table2.translate(x=7.8, y=6.8, z=0)
+#table2.rotate(z=1.57)
+
+
+# DYNAMIC OBJECTS
+objects = []
+possetter = PositionSetter()
+json_data = open("data/env_1.json")
+data = json.load(json_data)
+json_data.close()
+for obj in data["objects"]:
+  tmp = PassiveObject(obj["folder"],obj["object"])
+  tmp.properties(Object = True, 
+  Graspable = bool(obj["graspable"]),
+  Label = obj["label"])
+  tmp.name = obj["label"]
+  possetter.setPosition(tmp, obj["position"])
+  objects.append(tmp)
+
+###### HUMAN ######
+#Human = Human('mocap_human')
+#Human = LocalizedHuman('human')
+Human = Human()
+Human.properties(Manipulate=True, Object = True, Graspable = False, Label = "Human1")
+#Human.translate(x=3.3, y=6.5, z=0.1)
+Human.translate(x=7.4, y=5.6, z=0.0)
+Human.rotate(z=0.6)
+
+Human.armature.add_stream('pocolibs')
+Human.add_interface("pocolibs")
+#Human.add_interface("ros")
+
+# wiimote
+#Human.configure_service('socket')
+# kinect w/niut
+#mocapcontrol = MocapControl()
+#mocapcontrol.properties(human_id=0)
+#Human.append(mocapcontrol)
+#mocapcontrol.add_stream('pocolibs', poster='niutHuman')
+
+###### ROBOT ######
+pr2 = LocalizedPR2()
+pr2.properties(DraggedObject='')
+#pr2.translate(x=4.5, y=7.3, z=0.1)
+pr2.translate(x=7.4, y=7.9, z=0.1)
+#pr2.rotate(x=0, y=0, z=3.8)
+pr2.rotate(x=0, y=0, z=-1.4)
+pr2.add_interface("ros")
+
+VimanCamera = SemanticCamera()
+VimanCamera.translate(x=0.1, z=0.04)
+VimanCamera.add_stream('pocolibs', poster='morseViman')
+VimanCamera.rotate(x=0, y=0, z=0)
+#pr2.head.append(VimanCamera)
+pr2.r_arm.add_service('socket')
+pr2.l_arm.add_service('socket')
+pr2.head.add_service('socket')
+
+#To move the camera
+ptu = PTU()
+ptu.add_service('socket')
+ptu.append(VimanCamera)
+pr2.head.append(ptu)
+
+
+kb_controller = Keyboard()
+pr2.append(kb_controller)
+
+#teleport = Teleport()
+#teleport.add_stream('socket')
+#pr2.append(teleport)
+
+pr2.configure_service('socket')
+
+# Rajout du capteur pour la main
+bpymorse.deselect_all()
+bpymorse.add_object(type="EMPTY")
+bpymorse.add_sensor(type="NEAR")
+obj = bpymorse.get_context_object()
+sens = obj.game.sensors[-1]
+sens.name = "Near"
+sens.property = "Graspable"
+sens.distance = 2.00
+sens.reset_distance = 2.05
+sens.use_pulse_true_level = True
+bpymorse.add_controller()
+contr = obj.game.controllers[-1]
+contr.link(sensor = sens)
+
+obj.name = "Hand.Grasp.PR2"
+obj.parent = bpymorse.get_object("r_wrist_flex_joint")
+
+###### ENVIRONMENT ######
+env = Environment('mardi.blend')
+
+# vue derriere canape
+#env.place_camera([2, 4, 5])
+#env.aim_camera([0.8, 0.0, -0.7])
+# vue de haut
+env.place_camera([6, 4.5, 10])
+env.aim_camera([0.4, 0.0, 0.0])
+env.select_display_camera(VimanCamera)
