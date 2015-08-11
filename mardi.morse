@@ -20,7 +20,7 @@ from morse.builder import *
 
 #table2 = PassiveObject('props/objects.blend','SmallTable')
 table2 = PassiveObject('props/furnitures.blend','office_desk')
-table2.properties(Object = True, Graspable = False, Label = "DESKkikoo")
+table2.properties(Object = True, Graspable = False, Label = "office_desk")
 table2.translate(x=7.8, y=6.8, z=0)
 #table2.rotate(z=1.57)
 
@@ -44,6 +44,8 @@ for obj in data["objects"]:
 #Human = Human('mocap_human')
 #Human = LocalizedHuman('human')
 Human = Human()
+HumanPose = Pose()
+Human.append(HumanPose)
 Human.properties(Manipulate=True, Object = True, Graspable = False, Label = "Human1")
 #Human.translate(x=3.3, y=6.5, z=0.1)
 Human.translate(x=7.4, y=5.6, z=0.0)
@@ -51,6 +53,9 @@ Human.rotate(z=0.6)
 
 Human.armature.add_stream('pocolibs')
 Human.add_interface("pocolibs")
+
+HumanPose.add_stream("ros", method="morse.middleware.ros.pose.TFPublisher", child_frame_id="/human_base")
+
 #Human.add_interface("ros")
 
 # wiimote
