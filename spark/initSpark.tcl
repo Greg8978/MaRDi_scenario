@@ -22,6 +22,7 @@ proc initmorse { } {
   spark::ReadRobot -ack lwrCurrentPoseArmRight sahandPosterHand pomPos pomPlatineFramePos sparkyarpRobotConfig pr2Pose pr2JointState pr2JointMap
   spark::ReadObjects -ack USE_VIMAN 0 morseViman USE_VIMAN 0 morseViman
   ::spark::UpdateInterface -ack
+  spark::ComputeFacts -ack
 }
 
 
