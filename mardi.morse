@@ -56,6 +56,9 @@ Human.add_interface("pocolibs")
 
 HumanPose.add_stream("ros", method="morse.middleware.ros.pose.TFPublisher", child_frame_id="/human_base")
 
+#Human 3rd person
+Human.use_world_camera()
+
 #Human.add_interface("ros")
 
 # wiimote
