@@ -80,14 +80,14 @@ p3d_set_robot_current 0 0 0 0 0 0 1.8 6.7 0 0 0 0
 p3d_set_robot_goto 0 0 0 0 0 0 0 0 0 0 0 0
 #p3d_read_macro ./Objects/Static/desk_adream_obs.macro DESK
 p3d_read_macro ./Objects/MovableObstacles/TABLE_ADREAM.macro TABLE_4
-p3d_set_robot_current 0 0 0 0 0 0 7.8 5.7 0 0 0 -90
+p3d_set_robot_current 0 0 0 0 0 0 7.5 6.1 0 0 0 -90
 p3d_set_robot_goto 0 0 0 0 0 0 0 0 0 0 0 0
 #p3d_read_macro ./Objects/MovableObstacles/DRAWERS.macro DRAWERS_1
 #p3d_read_macro ./Objects/MovableObstacles/CUPBOARD_TALL_OPPENNED.macro CUPBOARD
 #p3d_read_macro ./Objects/MovableObstacles/M_WALL.macro M_WALL_1
 #p3d_read_macro ./Objects/MovableObstacles/M_WALL.macro M_WALL_2
 p3d_read_macro ./Objects/MovableObstacles/IKEA_low_table_lack_1.macro LOW_TABLE_SMALL_1
-p3d_set_robot_current 0 0 0 0 0 0 3.6 1.4 0 0 0 0
+p3d_set_robot_current 0 0 0 0 0 0 3.6 1.8 0 0 0 0
 p3d_set_robot_goto 0 0 0 0 0 0 0 0 0 0 0 0
 
 p3d_read_macro ./Objects/MovableObstacles/IKEA_shelf_expedit_light.macro IKEA_SHELF_LIGHT_1
