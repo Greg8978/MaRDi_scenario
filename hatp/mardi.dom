@@ -1,0 +1,427 @@
+factdatabase{
+	define entityType Object;
+	define entityType Area;
+	define entityType Location;
+
+	define entityAttributes Agent {
+		static atom string type;
+		
+		dynamic atom Location isAt;
+		dynamic atom Object holding;
+	}
+	
+	define entityAttributes Object {
+		static atom string type;
+	
+		dynamic atom Location isAt;
+	}
+	
+	define entityAttributes Location {
+		static atom Area isIn;
+		
+		dynamic atom bool scanned;
+		dynamic atom bool isEngagedInArea;
+	}
+	
+	define entityAttributes Area {
+	}
+	
+	PR2_ROBOT = new Agent;
+	HERAKLES_HUMAN1 = new Agent;
+	
+
+        LOTR_TAPE = new Object;
+        WALLE_TAPE = new Object;
+        BLACK_TAPE = new Object;
+        GREY_TAPE = new Object;
+        BLACK_CUBE = new Object;
+        BLUE_CUBE = new Object;
+        GREEN_CUBE = new Object;
+        RED_CUBE = new Object;
+        ACCESSKIT = new Object;
+        PINK_TRASHBIN = new Object;
+        SURPRISE_BOX = new Object;
+
+	Livingroom = new Area;
+	Livingroom_table = new Location;
+	Livingroom_coffeetable = new Location;
+	
+	Bedroom = new Area;
+        Bedroom_bedsidetable = new Location;
+        Bedroom_shelf = new Location;
+	
+	Kitchen = new Area;
+	Kitchen_table = new Location;
+
+	
+	PR2_ROBOT.type="robot";
+	HERAKLES_HUMAN1.type="human";
+	
+	LOTR_TAPE.type="dvd";
+	WALLE_TAPE.type="dvd";
+	BLACK_TAPE.type="dvd";
+        GREY_TAPE.type="dvd";
+	
+
+	BLUE_CUBE.type="box";
+	GREEN_CUBE.type="box";
+
+        SURPRISE_BOX.type="toolbox";
+        SURPRISE_BOX.isAt=Livingroom_table;
+
+	ACCESSKIT.type="container";
+        PINK_TRASHBIN.type = "container";
+
+	Livingroom_table.isIn=Livingroom;
+	Livingroom_coffeetable.isIn=Livingroom;
+	
+	Kitchen_table.isIn=Kitchen;
+
+        Bedroom_bedsidetable.isIn=Bedroom;
+        Bedroom_shelf.isIn=Bedroom;
+
+
+	//Init for tests
+	LOTR_TAPE.isAt=Kitchen_table;
+	GREY_TAPE.isAt=Livingroom_table;
+	WALLE_TAPE.isAt=Kitchen_table;
+	PINK_TRASHBIN.isAt=Livingroom_coffeetable;
+	BLUE_CUBE.isAt=Kitchen_table;
+	ACCESSKIT.isAt=Livingroom_coffeetable;
+	GREEN_CUBE.isAt=Kitchen_table;
+
+	Livingroom_table.scanned = false;
+	Livingroom_coffeetable.scanned = false;
+	
+        Bedroom_bedsidetable.scanned = false;
+        Bedroom_shelf.scanned = false;
+	
+	Kitchen_table.scanned = false;
+
+	Livingroom_coffeetable.isEngagedInArea = true;
+	Livingroom_table.isEngagedInArea = false;
+	Bedroom_bedsidetable.isEngagedInArea = false;
+	Bedroom_shelf.isEngagedInArea = false;
+	Kitchen_table.isEngagedInArea = false;
+
+
+	PR2_ROBOT.isAt = Livingroom_coffeetable;
+	//PR2_ROBOT.holding = GREY_TAPE;
+	HERAKLES_HUMAN1.isAt = Livingroom_coffeetable;
+}
+
+HTN{
+	method Localise(Object O){
+		goal{
+			OR{
+			O.isAt != NULL;
+			}{
+			FORALL(Location L, {}, {L.scanned==true;});
+			}
+		};
+		{
+			preconditions{};
+			subtasks{
+		//		A=SELECTORDERED(Area, {A.scanned==false;}, sortAreas(A, R), <);
+				L=SELECT(Location, {L.scanned==false;});
+				A=SELECT(Area, {L.isIn == A;});
+				
+				1: LocaliseInArea(A, O);
+				2: Localise(O) >1;
+			};
+		}
+	}
+	
+	method LocaliseInArea(Area A, Object O){
+		goal{
+			OR{
+				O.isAt != NULL;
+			}{
+				FORALL(Location L, {L.isIn == A;}, {L.scanned==true;});
+			}
+		};
+		{
+			preconditions{};
+			subtasks{
+			//	L=SELECTORDERED(Location, {L.isIn==A; L.scanned==false;}, sortLocations(L, R), <);
+				L=SELECT(Location, {L.isIn==A; L.scanned==false;});			
+	
+				1: Check(L, O);
+				2: LocaliseInArea(A, O) >1;
+			};
+		}
+	}
+	
+	method Check(Location L, Object O){
+		goal{
+			L.scanned==true;
+		};
+		{
+			preconditions{L.scanned==false;};
+			subtasks{
+				R=SELECTONCE(Agent, {R.type=="robot";});
+			
+				1: GotoLocation(R, L);
+				2: Scan(R, L, O) >1;
+			};
+		}
+	}
+	
+	method Bring(Object O, Agent H){
+		goal{
+			H.type=="human";
+			H.isAt==O.isAt;
+			H.holding==O;
+		};
+		{
+			preconditions{
+				H.type=="human";
+				H.holding==NULL;
+			};
+			subtasks{
+				R=SELECTONCE(Agent, {R.type=="robot"; R.holding==NULL;});
+				
+				1: Fetch(R, O);
+				2: Give(R, O, H) >1;
+			};
+		}
+	}
+	
+	method Fetch(Agent R, Object O){
+		goal{
+			R.type=="robot";
+			R.isAt==O.isAt;
+			R.holding==O;
+		};
+		{
+			preconditions{
+				R.type=="robot";
+				R.holding==NULL;
+			};
+			subtasks{
+				L=SELECTONCE(Location, {O.isAt == L;});
+
+				1: GotoLocation(R, L);
+				2: CheckScan(R, L, O) >1;
+				3: ApproachLocation(R, L) >2;
+				4: Pick(R, O) >3;
+			};
+		}
+	}
+	
+	method Give(Agent R, Object O, Agent H){
+		goal{
+			R.type=="robot";
+			R.isAt==H.isAt;
+			R.holding==NULL;
+			H.isAt==O.isAt;
+			H.holding==O;
+		};
+		{
+			preconditions{
+				R.type=="robot";
+				R.isAt==O.isAt;
+				R.holding==O;
+				H.type=="human";
+				H.holding==NULL;
+			};
+			subtasks{
+				L=SELECTONCE(Location, {H.isAt == L;});
+
+				1: GotoLocation(R, L);
+				2: ApproachLocation(R, L) >1;
+				3: Handover(R, O, H) >2;
+			};
+		}
+	}
+	
+	method Move(Object O, Location L){
+		goal{
+			O.isAt==L;
+			FORALL(Agent A, {}, {A.holding != O;});
+		};
+		{
+			preconditions{};
+			subtasks{
+				R=SELECTONCE(Agent, {R.type=="robot";});
+				
+				1: Fetch(R, O);
+				2: Put(R, O, L) >1;
+			};
+		}
+	}
+	
+	method Put(Agent R, Object O, Location L){
+		goal{
+			R.type=="robot";
+			R.isAt==O.isAt;
+			R.holding==NULL;
+			O.isAt==L;
+		};
+		{
+			preconditions{
+				R.type=="robot";
+				R.isAt==O.isAt;
+				R.holding==O;
+			};
+			subtasks{
+				1: GotoLocation(R, L);
+				2: CheckScan(R, L, O) >1;
+				3: ApproachLocation(R, L) >2;
+				4: Place(R, O, L) >3;
+			};
+		}
+	}
+	
+	method CheckScan(Agent R, Location L, Object O){
+		goal{
+			L.scanned == true;
+		};
+		{
+			preconditions{
+				L.scanned == false;
+			};
+			subtasks{
+				1: Scan(R, L, O);
+			};
+		}
+	}
+	method ApproachLocation(Agent A, Location L){
+		goal{L.isEngagedInArea == true;};
+		{
+			preconditions{
+				A.type=="robot";
+				A.isAt==L;
+			};
+			subtasks{
+				1: Approach(A, L);
+			};
+		}
+	}
+	method DisengageLocation(Agent A){
+		goal{FORALL(Location L, {}, {L.isEngagedInArea==false;});};
+		{
+			preconditions{
+				A.type=="robot";
+			};
+			subtasks{
+				L=SELECT(Location, {L.isEngagedInArea==true;});			
+
+				1: Disengage(A, L);
+			};
+		}
+	}
+	
+	//Is just a wrapper to goto for convenience
+	//This method is skipped if the agent is already where it should
+	method GotoLocation(Agent A, Location L){
+		goal{A.isAt==L;};
+		{
+			preconditions{
+				A.type=="robot";
+				A.isAt!=L;
+			};
+			subtasks{
+				1: DisengageLocation(A);
+				2: Travelto(A, L)>1;
+			};
+		}
+	}
+	
+	action Travelto(Agent A, Location L){
+		preconditions {
+			A.type=="robot";
+			A.isAt!=L;
+			
+		};
+		effects {
+			A.isAt=L;
+			IF{A.holding!=NULL;}
+			{A.holding.isAt=L;}
+		};
+		cost{costFn(1)};
+		duration{durationFn(1, 3)};
+	}
+	
+	action Approach(Agent A, Location L){
+		preconditions {
+			A.isAt==L;
+			
+		};
+		effects {
+			L.isEngagedInArea=true;
+		};
+		cost{costFn(1)};
+		duration{durationFn(1, 3)};
+	}
+	
+	action Disengage(Agent A, Location L){
+		preconditions {
+			A.isAt==L;
+			
+		};
+		effects {
+			L.isEngagedInArea=false;
+		};
+		cost{costFn(1)};
+		duration{durationFn(1, 3)};
+	}
+	
+	action Scan(Agent A, Location L, Object O){
+		preconditions {
+			A.type=="robot";
+			A.isAt==L;
+			L.scanned==false;
+		};
+		effects {
+			L.scanned=true;
+			
+		};
+		cost{costFn(1)};
+		duration{durationFn(1, 3)};
+	}
+	
+	action Pick(Agent R, Object O){
+		preconditions {
+			R.type=="robot";
+			R.isAt==O.isAt;
+			R.holding==NULL;
+		};
+		effects {
+			R.holding=O;
+		};
+		cost{costFn(1)};
+		duration{durationFn(1, 3)};
+	}
+	
+	action Place(Agent R, Object O, Location L){
+		preconditions {
+			R.type=="robot";
+			R.isAt==O.isAt;
+			R.isAt==L;
+			R.holding==O;
+		};
+		effects {
+			R.holding=NULL;
+		};
+		cost{costFn(1)};
+		duration{durationFn(1, 3)};
+	}
+	
+	action Handover(Agent R, Object O, Agent H){
+		preconditions {
+			R.type=="robot";
+			R.isAt==O.isAt;
+			R.isAt==H.isAt;
+			R.holding==O;
+			H.type=="human";
+			H.holding==NULL;
+		};
+		effects {
+			R.holding=NULL;
+			H.holding=O;
+		};
+		cost{costFn(1)};
+		duration{durationFn(1, 3)};
+	}
+}

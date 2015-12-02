@@ -1,0 +1,74 @@
+double costFn(double c){
+	return c;
+}
+
+std::pair<double, double> durationFn(double c, double d){
+	return std::make_pair(c, d);
+}
+
+double sortAreas(LightEntity const& A, LightEntity const& R){
+	if(A.getType()!="Area"){
+		std::cerr<<"ERROR: Calling sortAreas with an entity that is not an Area"<<std::endl;
+		return 9999.;
+	}
+	if(R.getType()!="Agent"){
+                std::cerr<<"ERROR: Calling sortAreas with an entity that is not an Robot"<<std::endl;
+                return 9999.;
+        }
+
+
+	//if(A.getName()=="Livingroom")
+	//	return 3.;
+	//if(A.getName()=="Kitchen")
+	//	return 5.;
+	//if(A.getName()=="Bedroom")
+	//	return 2.;
+	
+	std::cerr<<"ERROR: Unknown entity"<<std::endl;
+	return -9999.;
+}
+
+double sortLocations(LightEntity const& L, LightEntity const& R){
+	if(L.getType()!="Location"){
+		std::cerr<<"ERROR: Calling sortLocations with an entity that is not a Location"<<std::endl;
+		return 9999.;
+	}
+	if(R.getType()!="Agent"){
+                std::cerr<<"ERROR: Calling sortAreas with an entity that is not an Robot"<<std::endl;
+                return 9999.;
+        }
+
+	if(R.get<string>("isAt") == L.getName()){
+                return 1;
+        }else{
+                return 10;
+        }
+
+
+	if(L.getName()=="Livingroom_table")
+		return 1.;
+	if(L.getName()=="Livingroom_coffeetable")
+		return 2.;
+	if(L.getName()=="Bedroom_chest")
+		return 3.;
+	if(L.getName()=="Bedroom_shelf")
+		return 4.;
+	if(L.getName()=="Bedroom_console")
+		return 5.;
+	if(L.getName()=="Bedroom_bedsidetable")
+		return 6.;
+	if(L.getName()=="Kitchen_table")
+		return 7.;
+	if(L.getName()=="Kitchen_cupboard")
+		return 8.;
+	
+	std::cerr<<"ERROR: Unknown entity"<<std::endl;
+	return -9999.;
+}
+
+#define printState() printStateFn(wb)
+bool printStateFn(LightWorldBase& wb){
+	std::cout<<wb.toString()<<std::endl;
+	
+	return true;
+}
